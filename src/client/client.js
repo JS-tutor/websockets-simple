@@ -2,12 +2,10 @@ const {EVENTS} = require('../const/const')
 
 window.onload = function () {
     let app = document.getElementById('app')
+    app.innerHTML = ''
+
     let textInput = document.getElementById('textInput')
     let sendButton = document.getElementById('sendButton')
-    let disconnectButton = document.getElementById('disconnectButton')
-
-    let socket = io.connect('http://localhost:3333')
-
     sendButton.addEventListener('click', e => {
         if(!socket.connected) return
         let s = textInput.value.trim()
@@ -16,6 +14,7 @@ window.onload = function () {
         textInput.value = ''
     })
 
+    let disconnectButton = document.getElementById('disconnectButton')
     disconnectButton.addEventListener('click', e => socket.disconnect())
 
     function addLog(s) {
@@ -30,24 +29,12 @@ window.onload = function () {
         app.appendChild(div)
     }
 
+    let socket = io.connect('http://localhost:3333')
     socket.on('connect', () => {
-        addLog('connected')
-
-        socket.on(EVENTS.SETUP_NAME, name => {
-            addLog('My name is ' + name)
-        })
-
-        socket.on(EVENTS.USER_ENTER, name => {
-            addLog(name + ' entered')
-        })
-
-        socket.on(EVENTS.USER_EXIT, name => {
-            addLog(name + ' exited')
-        })
-
-        socket.on(EVENTS.MESSAGE, data => {
-            addMsg(data.name + ': ' + data.msg)
-        })
+        socket.on(EVENTS.SETUP_NAME, name => addLog('My name is ' + name))
+        socket.on(EVENTS.USER_ENTER, name => addLog(name + ' entered'))
+        socket.on(EVENTS.USER_EXIT, name => addLog(name + ' exited'))
+        socket.on(EVENTS.MESSAGE, data => addMsg(data.name + ': ' + data.msg))
     })
 
     socket.on('disconnect', () => addLog('disconnected from server'))
